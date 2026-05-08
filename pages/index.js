@@ -1,3 +1,4 @@
+import { supabase } from "../lib/supabase";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
@@ -5,6 +6,33 @@ import Barcode from "react-barcode";
 import { Html5Qrcode } from "html5-qrcode";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+
+
+// CLOUD DATABASE HELPERS
+async function saveToolToCloud(tool) {
+  try {
+    await supabase.from("tools").insert([tool]);
+    console.log("Saved tool to Supabase:", tool);
+  } catch (err) {
+    console.error("Supabase save failed", err);
+  }
+}
+
+async function loadToolsFromCloud(setter) {
+  try {
+    const { data, error } = await supabase
+      .from("tools")
+      .select("*");
+
+    if (!error && data) {
+      setter(data);
+    }
+  } catch (err) {
+    console.error("Supabase load failed", err);
+  }
+}
+
+
 
 const STORAGE_KEY = "tool-control-clean-v1";
 const CHANNEL = "tool-control-clean-live";
@@ -177,7 +205,7 @@ export default function Home() {
       users, tools, toolboxes, consumables, discrepancies, history, scanHistory, messages,
       reportsArchive, aircraftCrew, aircraftLogs, theme, hangar
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    // localStorage backup\nlocalStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     channelRef.current?.postMessage({ type: "SYNC", payload });
   }, [mounted, users, tools, toolboxes, consumables, discrepancies, history, scanHistory, messages, reportsArchive, aircraftCrew, aircraftLogs, theme, hangar]);
 
@@ -698,7 +726,7 @@ export default function Home() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img
             src="/mechanics-tool-tracker-logo.png"
-            alt="Mechanics Tool Tracker Logo"
+            alt="Mechanics Tool Tracker ☁️ Cloud Database Connected Logo"
             style={{
               width: 72,
               height: 72,
