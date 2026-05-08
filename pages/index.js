@@ -751,7 +751,7 @@ export default function Home() {
             <p style={{ margin: 0, opacity: 0.8 }}>Real Shop Tool Control System</p>
           </div>
         </div>
-        <p>Clean Rebuild</p>
+        <p></p>
         <div className={`role ${role}`}>{role.toUpperCase()}</div>
         {nav.map(([key, icon, label]) => (
           <button key={key} className={tab === key ? "active" : ""} onClick={() => setTab(key)} title={label}>
