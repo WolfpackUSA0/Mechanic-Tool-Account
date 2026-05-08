@@ -92,6 +92,45 @@ export default function Home() {
   const [aircraftLogs, setAircraftLogs] = useState({
     N123AB: [{ id: 1, user: "System", msg: "Aircraft opened", date: new Date().toLocaleDateString(), time: "08:00 AM" }]
   });
+
+  // REAL SUPABASE CLOUD SYNC
+  useEffect(() => {
+    async function loadCloudData() {
+      try {
+        const { data, error } = await supabase
+          .from("tools")
+          .select("*");
+
+        if (!error && data && data.length > 0) {
+          setTools(data);
+          console.log("Loaded cloud tools:", data);
+        }
+      } catch (err) {
+        console.error("Cloud load error:", err);
+      }
+    }
+
+    loadCloudData();
+  }, []);
+
+  useEffect(() => {
+    async function syncTools() {
+      try {
+        if (!tools || tools.length === 0) return;
+
+        await supabase.from("tools").delete().neq("id", 0);
+        await supabase.from("tools").insert(tools);
+
+        console.log("Synced tools to cloud");
+      } catch (err) {
+        console.error("Cloud sync failed:", err);
+      }
+    }
+
+    syncTools();
+  }, [tools]);
+
+
   const [currentAircraft, setCurrentAircraft] = useState("");
   const [tail, setTail] = useState("N123AB");
   const [hangar, setHangar] = useState("Hangar A");
@@ -726,7 +765,7 @@ export default function Home() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img
             src="/mechanics-tool-tracker-logo.png"
-            alt="Mechanics Tool Tracker ☁️ Cloud Database Connected Logo"
+            alt="Mechanics Tool Tracker ☁️ SUPABASE CLOUD ACTIVE Logo"
             style={{
               width: 72,
               height: 72,
